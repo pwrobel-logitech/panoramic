@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cmath>
 
-//Screen dimension constants
+//Window initial dimension constants
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
@@ -160,9 +160,10 @@ int main( int argc, char* args[] )
                 }
                 if(e.key.keysym.sym == SDLK_d)
                 {
-                    close();printf("counter %d, numdisplays %d \n", screen_counter, numdisplays);
+                    close();
+                    printf("Display counter %d, numdisplays %d \n", screen_counter, numdisplays);
                     screen_counter++;
-                    if (screen_counter == numdisplays)
+                    if (screen_counter >= numdisplays)
                         screen_counter = 0;
                     init(is_fullscreen);
                 }
