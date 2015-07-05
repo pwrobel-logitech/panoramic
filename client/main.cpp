@@ -29,8 +29,6 @@ SDL_Texture* loadTexture( std::string path );
 //The window we'll be rendering to
 SDL_Window* gWindow = NULL;
 
-//The window renderer
-SDL_Renderer* gRenderer = NULL;
 
 int screen_counter = 0;
 int numdisplays = 0;
@@ -60,7 +58,7 @@ bool init(bool is_fullscreen)
 		//Create window
         gWindow = SDL_CreateWindow( "GL_RENDERER", SDL_WINDOWPOS_CENTERED_DISPLAY(screen_counter),
                                     SDL_WINDOWPOS_CENTERED_DISPLAY(screen_counter),
-                                    SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN|SDL_WINDOW_OPENGL );
+                                    SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN|SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE );
 		if( gWindow == NULL )
 		{
 			printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
@@ -100,15 +98,6 @@ bool init(bool is_fullscreen)
 			}
 		    //
 
-			//Create renderer for window
-			/*gRenderer = SDL_CreateRenderer( gWindow, -1, SDL_RENDERER_ACCELERATED );
-			if( gRenderer == NULL )
-			{
-				printf( "Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
-				success = false;
-			}
-			*/
-
 		}
 	}
 
@@ -138,11 +127,8 @@ bool loadMedia()
 void close()
 {
 	//Destroy window	
-	SDL_DestroyRenderer( gRenderer );
 	SDL_DestroyWindow( gWindow );
 	gWindow = NULL;
-	gRenderer = NULL;
-
 	//Quit SDL subsystems
 	SDL_Quit();
 }
@@ -186,10 +172,9 @@ int main( int argc, char* args[] )
 				//Handle events on queue
 				while( SDL_PollEvent( &e ) != 0 )
 				{
-
+					PrintEvent(&e);
 		switch (e.type)
         {
-			PrintEvent(&e);
 			case SDL_WINDOWEVENT:
 				printf("Window event \n");
 				if( !glrenderer::initGL(sizeX, sizeY) )
@@ -197,6 +182,11 @@ int main( int argc, char* args[] )
 					printf( "Unable to initialize OpenGL!\n" );
 		        }
 				draw_frame();
+				if(e.window.event == SDL_WINDOWEVENT_EXPOSED){
+					if(is_fullscreen){
+
+					}
+				}
 				break;
             case SDL_MOUSEMOTION:
             break;
@@ -251,53 +241,53 @@ void PrintEvent(const SDL_Event * event)
     if (event->type == SDL_WINDOWEVENT) {
         switch (event->window.event) {
         case SDL_WINDOWEVENT_SHOWN:
-            SDL_Log("Window %d shown", event->window.windowID);
+            printf("Window %d shown \n", event->window.windowID);
             break;
         case SDL_WINDOWEVENT_HIDDEN:
-            SDL_Log("Window %d hidden", event->window.windowID);
+            printf("Window %d hidden \n", event->window.windowID);
             break;
         case SDL_WINDOWEVENT_EXPOSED:
-            SDL_Log("Window %d exposed", event->window.windowID);
+            printf("Window %d exposed \n", event->window.windowID);
             break;
         case SDL_WINDOWEVENT_MOVED:
-            SDL_Log("Window %d moved to %d,%d",
+            printf("Window %d moved to %d,%d \n",
                     event->window.windowID, event->window.data1,
                     event->window.data2);
             break;
         case SDL_WINDOWEVENT_RESIZED:
-            SDL_Log("Window %d resized to %dx%d",
+            printf("Window %d resized to %dx%d \n",
                     event->window.windowID, event->window.data1,
                     event->window.data2);
             break;
         case SDL_WINDOWEVENT_MINIMIZED:
-            SDL_Log("Window %d minimized", event->window.windowID);
+            printf("Window %d minimized \n", event->window.windowID);
             break;
         case SDL_WINDOWEVENT_MAXIMIZED:
-            SDL_Log("Window %d maximized", event->window.windowID);
+            printf("Window %d maximized \n", event->window.windowID);
             break;
         case SDL_WINDOWEVENT_RESTORED:
-            SDL_Log("Window %d restored", event->window.windowID);
+            printf("Window %d restored \n", event->window.windowID);
             break;
         case SDL_WINDOWEVENT_ENTER:
-            SDL_Log("Mouse entered window %d",
+            printf("Mouse entered window %d \n",
                     event->window.windowID);
             break;
         case SDL_WINDOWEVENT_LEAVE:
-            SDL_Log("Mouse left window %d", event->window.windowID);
+            printf("Mouse left window %d \n", event->window.windowID);
             break;
         case SDL_WINDOWEVENT_FOCUS_GAINED:
-            SDL_Log("Window %d gained keyboard focus",
+            printf("Window %d gained keyboard focus \n",
                     event->window.windowID);
             break;
         case SDL_WINDOWEVENT_FOCUS_LOST:
-            SDL_Log("Window %d lost keyboard focus",
+            printf("Window %d lost keyboard focus \n",
                     event->window.windowID);
             break;
         case SDL_WINDOWEVENT_CLOSE:
-            SDL_Log("Window %d closed", event->window.windowID);
+            printf("Window %d closed \n", event->window.windowID);
             break;
         default:
-            SDL_Log("Window %d got unknown event %d",
+            printf("Window %d got unknown event %d \n",
                     event->window.windowID, event->window.event);
             break;
         }
