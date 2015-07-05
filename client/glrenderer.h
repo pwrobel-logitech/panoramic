@@ -1,11 +1,13 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 //#include <SDL2/SDL_image.h>
+#include <GL/glu.h>
 #include <stdio.h>
 #include <string>
 #include <iostream>
 #include <cmath>
 #include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 namespace glrenderer {
 
@@ -18,8 +20,8 @@ struct worldinfo{
 	int resY;
 	double fovX;// total angle in radians
 	double horizontal_angular_overlap; //in radians, =0 by default
-	glm::mat4 projection;
-	glm::mat4 view_central_cam;
+	glm::dmat4 projection;
+	glm::dmat4 view_central_cam;
 };
 
 //minimal texture info
