@@ -1,13 +1,13 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 //#include <SDL2/SDL_image.h>
-#include <GL/glu.h>
 #include <stdio.h>
 #include <string>
 #include <iostream>
 #include <cmath>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include <vector>
 
 namespace glrenderer {
 
@@ -26,17 +26,30 @@ struct worldinfo{
 
 //minimal texture info
 struct texinfo{
-	int ntexX;
+	int ntexX;//total number of textures : ntexX * ntexY;
 	int ntexY;
+	std::vector<char*> teximgs; //pointers to texture data
+	std::vector<int>   texids; //texture id's
+	int tex_resX; //each tex res xy
+	int tex_resY;
 };
 
 extern worldinfo myworld;
 extern texinfo texdata;
 
+struct sphereinfo{
+	double R;
+	int nfi;//number of division units in polar teta angle
+	int nteta;
+	double normal_dir; //+1 or -1
+	int sphere_display_list_id;
+};
+
+extern sphereinfo mysphereinfo;
+
 bool initGL(int sx, int sy);
-
 void renderGL();
-
 void setup_projection();
+void setup_sphere();
 
 }
