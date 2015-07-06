@@ -38,6 +38,26 @@ int sizeY = 0;
 
 bool is_spherical_grid = false;
 
+void create_thread();
+static int MyThread(void *ptr);
+bool is_thread_running = true;
+SDL_Thread *thread;
+SDL_mutex *mutex;
+
+
+
+//invalidate logics - invalidate = request for a redraw in a separate thread
+bool is_screen_valid = true;
+void invalidate_screen(){
+	//if(is_screen_valid)
+	//if (SDL_LockMutex(mutex) == 0) {
+		is_screen_valid = false;
+	//	SDL_UnlockMutex(mutex);
+	//} else {
+	//	fprintf(stderr, "Couldn't lock mutex\n");
+	//}
+}
+
 bool init(bool is_fullscreen)
 {
 	//Initialization flag
@@ -140,6 +160,12 @@ int draw_frame(){
 	glrenderer::renderGL(is_spherical_grid);
 	//Update screen
     SDL_GL_SwapWindow( gWindow );
+	//if (SDL_LockMutex(mutex) == 0) {
+
+	//	SDL_UnlockMutex(mutex);
+	//} else {
+	//	fprintf(stderr, "Couldn't lock mutex\n");
+	//}
 	return 0;
 }
 
@@ -161,6 +187,7 @@ int main( int argc, char* args[] )
 		}
 		else
 		{	
+			create_thread();
 			draw_frame();
 			//Main loop flag
 			bool quit = false;
@@ -219,7 +246,7 @@ int main( int argc, char* args[] )
                 {
                     printf("Grid toggled \n");
 					is_spherical_grid = !is_spherical_grid;
-					draw_frame();
+					invalidate_screen();
                 }
                 break;
         }	
@@ -234,13 +261,54 @@ int main( int argc, char* args[] )
 
 
 
-
+	is_thread_running = false;
+	int threadReturnValue;
+	SDL_WaitThread(thread, &threadReturnValue);
+	printf("\nThread returned value: %d", threadReturnValue);
+	SDL_DestroyMutex(mutex);
 	//Free resources and close SDL
 	close();
 
 	return 0;
 }
 
+
+
+
+void create_thread(){
+
+	mutex = SDL_CreateMutex();
+	if (!mutex) {
+	  printf( "Couldn't create mutex\n");
+	  return;
+	}
+	int threadReturnValue;
+	printf("\nSimple SDL_CreateThread test:");
+
+	// Simply create a thread
+	thread = SDL_CreateThread(MyThread, "MyThread", (void *)NULL);
+	if (NULL == thread) {
+		printf("\nSDL_CreateThread failed: %s\n", SDL_GetError());
+	}
+}
+
+
+int MyThread(void *ptr)
+{
+    int cnt = 0;
+
+    while(is_thread_running) {
+        printf("\nThread counter: %d", cnt);
+        SDL_Delay(20);is_spherical_grid = !is_spherical_grid;draw_frame();
+		if (!is_screen_valid){
+			draw_frame();
+			is_screen_valid = true;
+		}
+		cnt++;
+    }
+
+    return cnt;
+}
 
 
 

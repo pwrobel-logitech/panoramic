@@ -167,6 +167,8 @@ void glrenderer::setup_sphere(){
 	glrenderer::mysphereinfo.sphere_display_list_id = glGenLists (1);
 	glNewList(glrenderer::mysphereinfo.sphere_display_list_id, GL_COMPILE);
 	glColor3d(1.0, 0.0, 0.0);
+	glPushMatrix();
+	glRotated(-90.0, 0.0, 1.0, 0.0);
 	glBegin(GL_QUAD_STRIP);
 	for(int j=0;j<glrenderer::mysphereinfo.nteta;j++){
 		for(int i=0;i<=glrenderer::mysphereinfo.nfi;i++){
@@ -181,23 +183,23 @@ void glrenderer::setup_sphere(){
 	glEnd();
 	glEndList();
 
-	R *= 0.99;
+	R *= 0.99;//little smaller sphere
 	int Ngrid_fi = 40;
 	int Ngrid_teta = 40;
-	glrenderer::mysphereinfo.sphere_grid_display_list_id = glGenLists (1);
+	glrenderer::mysphereinfo.sphere_grid_display_list_id = glGenLists (1); //cache into display list for faster drawing later
 	glNewList(glrenderer::mysphereinfo.sphere_grid_display_list_id, GL_COMPILE);
 	d_fi = (2.0*pi)/Ngrid_fi;
 	d_teta = (pi)/Ngrid_teta;
 	glBegin(GL_LINES);
 	glColor3d(0.0, 1.0, 0.0);
-	//draw longintudal lines - from poles
+	//generate longintudal lines - from poles
 	for(int j=0;j<glrenderer::mysphereinfo.nteta;j++){
 		for(int i=0;i<=glrenderer::mysphereinfo.nfi;i++){
 			glVertex3d(R*sin(j*d_teta)*cos(i*d_fi), R*sin(j*d_teta)*sin(i*d_fi), R*cos(j*d_teta));
 			glVertex3d(R*sin((j+1)*d_teta)*cos(i*d_fi), R*sin((j+1)*d_teta)*sin(i*d_fi), R*cos((j+1)*d_teta));
         }
 	}
-	//draw lattitudal lines - equatorial
+	//generate lattitudal lines - equatorial
 	for(int j=0;j<glrenderer::mysphereinfo.nteta;j++){
 		for(int i=0;i<=glrenderer::mysphereinfo.nfi;i++){
 			glVertex3d(R*sin(j*d_teta)*cos(i*d_fi), R*sin(j*d_teta)*sin(i*d_fi), R*cos(j*d_teta));
@@ -205,5 +207,6 @@ void glrenderer::setup_sphere(){
         }
 	}
 	glEnd();
+	glPopMatrix();
 	glEndList();
 }
