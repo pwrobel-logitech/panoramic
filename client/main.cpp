@@ -36,6 +36,8 @@ int numdisplays = 0;
 int sizeX = 0;
 int sizeY = 0;
 
+bool is_spherical_grid = false;
+
 bool init(bool is_fullscreen)
 {
 	//Initialization flag
@@ -94,7 +96,7 @@ bool init(bool is_fullscreen)
 		        }
 
 				//render gl
-				glrenderer::renderGL();
+				glrenderer::renderGL(is_spherical_grid);
 			}
 		    //
 
@@ -135,7 +137,7 @@ void close()
 
 
 int draw_frame(){
-	glrenderer::renderGL();
+	glrenderer::renderGL(is_spherical_grid);
 	//Update screen
     SDL_GL_SwapWindow( gWindow );
 	return 0;
@@ -211,6 +213,12 @@ int main( int argc, char* args[] )
                     if (screen_counter >= numdisplays)
                         screen_counter = 0;
                     init(is_fullscreen);
+					draw_frame();
+                }
+				if(e.key.keysym.sym == SDLK_s)
+                {
+                    printf("Grid toggled \n");
+					is_spherical_grid = !is_spherical_grid;
 					draw_frame();
                 }
                 break;

@@ -43,12 +43,13 @@ struct sphereinfo{
 	int nteta;
 	double normal_dir; //+1 or -1
 	int sphere_display_list_id;
+	int sphere_grid_display_list_id;
 };
 
 extern sphereinfo mysphereinfo;
 
 bool initGL(int sx, int sy);
-void renderGL();
+void renderGL(bool is_grid);
 void setup_projection();
 void setup_sphere();
 

@@ -22,7 +22,7 @@ void glrenderer::setup_projection(){
 	//glLoadMatrixd( &projection[0][0]);
 	//gluPerspective(90.0,((double)glrenderer::myworld.resX)/((double)glrenderer::myworld.resY) , 0.1, 10.0);
 	double zNear = 0.2;
-	double zFar = 10.0;
+	double zFar = 1000.0;
 	double fy = yfov;
 	double fH = tan( (fy / 2.0) / 180.0 * pi ) * zNear;
 	double fW = ((double)glrenderer::myworld.resX)/((double)glrenderer::myworld.resY) * fH;
@@ -60,7 +60,7 @@ bool glrenderer::initGL(int sx, int sy)
     glLoadIdentity();
 
 
-
+	glrenderer::setup_sphere();
 
 
     //Check for error
@@ -90,7 +90,7 @@ bool glrenderer::initGL(int sx, int sy)
 
 
 
-void glrenderer::renderGL()
+void glrenderer::renderGL(bool is_grid)
 {
 	GLenum error = GL_NO_ERROR;
 
@@ -103,7 +103,7 @@ void glrenderer::renderGL()
 
 
 	//eye, center, up
-	//glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, 0.0, -4.0), glm::dvec3(0.0, 1.0, 0.0));
+	//glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, 0.0, -4.0), glm::dvec3(1.0, 1.0, 0.0));
 	//glLoadMatrixd(&view[0][0]);
 
     //Initialize clear color
@@ -119,22 +119,31 @@ void glrenderer::renderGL()
 
 
 	//glPushMatrix();
-    //Clear color buffer
-
-	glLoadIdentity();
 
 
+	//glLoadIdentity();
+
+    //Clear color buffer and depth buffer
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+
+
+	//Render sphere
+	glCallList(glrenderer::mysphereinfo.sphere_display_list_id);
+
+	//Render spherical grid
+	if(is_grid)
+		glCallList(glrenderer::mysphereinfo.sphere_grid_display_list_id);
+
     //Render quad
-    glColor3d(0.0,1.0,0.0);
+    /*glColor3d(0.0,1.0,0.0);
 
 	glBegin( GL_QUADS );
 		glVertex3d( -0.5, -0.5, -2 );
 		glVertex3d( 0.5, -0.5 , -2);
 		glVertex3d( 0.5, 0.5, -2 );
 		glVertex3d( -0.5, 0.5 , -2);
-    glEnd();
+    glEnd();*/
 	//glPopMatrix();
 }
 
@@ -157,7 +166,7 @@ void glrenderer::setup_sphere(){
 
 	glrenderer::mysphereinfo.sphere_display_list_id = glGenLists (1);
 	glNewList(glrenderer::mysphereinfo.sphere_display_list_id, GL_COMPILE);
-
+	glColor3d(1.0, 0.0, 0.0);
 	glBegin(GL_QUAD_STRIP);
 	for(int j=0;j<glrenderer::mysphereinfo.nteta;j++){
 		for(int i=0;i<=glrenderer::mysphereinfo.nfi;i++){
@@ -167,6 +176,32 @@ void glrenderer::setup_sphere(){
 			glNormal3d(glrenderer::mysphereinfo.normal_dir*sin((j+1)*d_teta)*cos(i*d_fi),glrenderer::mysphereinfo.normal_dir*sin((j+1)*d_teta)*sin(i*d_fi),glrenderer::mysphereinfo.normal_dir*cos((j+1)*d_teta));
 			//glTexCoord2d(((i*d_fi)/(2.0*Math.PI))*uzyteczna_czesc_textury_x,(1-cos((j+1)*d_teta))/2.0);
 			glVertex3d(R*sin((j+1)*d_teta)*cos(i*d_fi), R*sin((j+1)*d_teta)*sin(i*d_fi), R*cos((j+1)*d_teta));
+        }
+	}
+	glEnd();
+	glEndList();
+
+	R *= 0.99;
+	int Ngrid_fi = 40;
+	int Ngrid_teta = 40;
+	glrenderer::mysphereinfo.sphere_grid_display_list_id = glGenLists (1);
+	glNewList(glrenderer::mysphereinfo.sphere_grid_display_list_id, GL_COMPILE);
+	d_fi = (2.0*pi)/Ngrid_fi;
+	d_teta = (pi)/Ngrid_teta;
+	glBegin(GL_LINES);
+	glColor3d(0.0, 1.0, 0.0);
+	//draw longintudal lines - from poles
+	for(int j=0;j<glrenderer::mysphereinfo.nteta;j++){
+		for(int i=0;i<=glrenderer::mysphereinfo.nfi;i++){
+			glVertex3d(R*sin(j*d_teta)*cos(i*d_fi), R*sin(j*d_teta)*sin(i*d_fi), R*cos(j*d_teta));
+			glVertex3d(R*sin((j+1)*d_teta)*cos(i*d_fi), R*sin((j+1)*d_teta)*sin(i*d_fi), R*cos((j+1)*d_teta));
+        }
+	}
+	//draw lattitudal lines - equatorial
+	for(int j=0;j<glrenderer::mysphereinfo.nteta;j++){
+		for(int i=0;i<=glrenderer::mysphereinfo.nfi;i++){
+			glVertex3d(R*sin(j*d_teta)*cos(i*d_fi), R*sin(j*d_teta)*sin(i*d_fi), R*cos(j*d_teta));
+			glVertex3d(R*sin(j*d_teta)*cos((i+1)*d_fi), R*sin(j*d_teta)*sin((i+1)*d_fi), R*cos(j*d_teta));
         }
 	}
 	glEnd();
