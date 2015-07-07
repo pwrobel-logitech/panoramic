@@ -4,7 +4,7 @@ SDL_GLContext glrenderer::gContext;
 glrenderer::worldinfo glrenderer::myworld;
 glrenderer::texinfo glrenderer::texdata;
 
-double default_fovX = 60;
+double default_fovX = 60;//degrees
 
 void glrenderer::setup_projection(){
 	double pi = 2.0 * glm::asin(1);
@@ -13,7 +13,7 @@ void glrenderer::setup_projection(){
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();
 	glrenderer::myworld.fovX = pi * (default_fovX / 180.0);
-	double yfov = glrenderer::myworld.fovX * ((double)glrenderer::myworld.resY)/((double)glrenderer::myworld.resX) * (180.0/pi);
+	double yfov = (180.0/pi)*2.0*atan((((double)glrenderer::myworld.resY)/((double)glrenderer::myworld.resX))*tan(glrenderer::myworld.fovX/2.0));
 	//glm::dmat4 projection = glm::perspective(yfov,((double)glrenderer::myworld.resX)/((double)glrenderer::myworld.resY) , 0.1, 10.0);
 	//glLoadMatrixd( &projection[0][0]);
 	//gluPerspective(90.0,((double)glrenderer::myworld.resX)/((double)glrenderer::myworld.resY) , 0.1, 10.0);
