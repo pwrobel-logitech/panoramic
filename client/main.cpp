@@ -45,23 +45,41 @@ SDL_Thread *thread;
 SDL_mutex *mutex;
 
 
+bool lock_mutex(){
+	if (SDL_LockMutex(mutex) == 0) {
+		return true;
+	} else {
+		fprintf(stderr, "Couldn't lock mutex\n");
+		return false;
+	}
+};
+bool unlock_mutex(){
+	SDL_UnlockMutex(mutex);
+	return true;///fix this latex to check if it succeeds
+};
+
+
+bool is_fullscreenchange_requested = false;
+bool is_displaychange_requested = false;
+void request_fulscreen_change();
+void request_display_change();
+
 
 //invalidate logics - invalidate = request for a redraw in a separate thread
 bool is_screen_valid = true;
 void invalidate_screen(){
-	//if(is_screen_valid)
-	//if (SDL_LockMutex(mutex) == 0) {
+	if(is_screen_valid){
+		lock_mutex();
 		is_screen_valid = false;
-	//	SDL_UnlockMutex(mutex);
-	//} else {
-	//	fprintf(stderr, "Couldn't lock mutex\n");
-	//}
+		unlock_mutex();
+	}
 }
 
 bool init(bool is_fullscreen)
 {
 	//Initialization flag
 	bool success = true;
+
 
 	//Initialize SDL
 	if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
@@ -157,15 +175,10 @@ void close()
 
 
 int draw_frame(){
-
-	if (SDL_LockMutex(mutex) == 0) {
+	lock_mutex();
 	glrenderer::renderGL(is_spherical_grid);
-	//Update screen
-    SDL_GL_SwapWindow( gWindow );
-		SDL_UnlockMutex(mutex);
-	} else {
-		fprintf(stderr, "Couldn't lock mutex\n");
-	}
+  SDL_GL_SwapWindow( gWindow );
+	unlock_mutex();
 	return 0;
 }
 
@@ -177,12 +190,8 @@ int main( int argc, char* args[] )
 	create_thread();
 
 
-	if (SDL_LockMutex(mutex) == 0) {
-
-		SDL_UnlockMutex(mutex);
-	} else {
-		fprintf(stderr, "Couldn't lock mutex\n");
-	}
+	lock_mutex();
+unlock_mutex();
 
 
 
@@ -241,9 +250,11 @@ int main( int argc, char* args[] )
                     //is_fullscreen = !is_fullscreen;
                     //init(is_fullscreen);
 										//draw_frame();
+										request_fulscreen_change();
                 }
                 if(e.key.keysym.sym == SDLK_d)
                 {
+										request_display_change();
                     //close();
                     //printf("Display counter %d, numdisplays %d \n", screen_counter, numdisplays);
                     //screen_counter++;
@@ -311,21 +322,42 @@ int MyThread(void *ptr)
 {
     int cnt = 0;
 
-	if (SDL_LockMutex(mutex) == 0) {
-			if( !init(false) )
+	lock_mutex();
+		if( !init(false) )
 		{
 			printf( "Failed to initialize!\n" );
 		}
-		SDL_UnlockMutex(mutex);
-	} else {
-		fprintf(stderr, "Couldn't lock mutex\n");
-	}
+		unlock_mutex();
 
 	
 
 draw_frame();
 
     while(is_thread_running) {
+
+lock_mutex();
+if(is_fullscreenchange_requested){
+
+                    is_fullscreen = !is_fullscreen;
+                    init(is_fullscreen);
+										draw_frame();
+	is_fullscreenchange_requested = false;
+}
+unlock_mutex();
+
+lock_mutex();
+if(is_displaychange_requested){
+ //close();
+                    //printf("Display counter %d, numdisplays %d \n", screen_counter, numdisplays);
+                    //screen_counter++;
+                    //if (screen_counter >= numdisplays)
+                        //screen_counter = 0;
+                    //init(is_fullscreen);
+					//draw_frame();
+	is_displaychange_requested = false;
+}
+unlock_mutex();
+
         printf("\nThread counter: %d", cnt);
         SDL_Delay(20);
 		if (!is_screen_valid){
@@ -339,6 +371,19 @@ draw_frame();
 }
 
 
+
+void request_fulscreen_change(){
+	lock_mutex();
+	is_fullscreenchange_requested = true;
+	unlock_mutex();
+}
+
+
+void request_display_change(){
+	lock_mutex();
+	is_displaychange_requested = true;
+	unlock_mutex();
+}
 
 void PrintEvent(const SDL_Event * event)
 {
