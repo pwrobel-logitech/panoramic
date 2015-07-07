@@ -4,7 +4,7 @@ SDL_GLContext glrenderer::gContext;
 glrenderer::worldinfo glrenderer::myworld;
 glrenderer::texinfo glrenderer::texdata;
 
-double default_fovX = 60;//degrees
+double default_fovX = 90;//degrees
 
 void glrenderer::setup_projection(){
 	double pi = 2.0 * glm::asin(1);
@@ -76,12 +76,15 @@ void glrenderer::renderGL(bool is_grid, int sx, int sy)
 	//Clear color buffer and depth buffer
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+	glPushMatrix();
+	glRotated(glrenderer::myworld.center_teta, 1.0, 0.0, 0.0);
+	glRotated(glrenderer::myworld.center_fi, 0.0, 0.0, 1.0);
 	//Render sphere
 	glCallList(glrenderer::mysphereinfo.sphere_display_list_id);
 	//Render spherical grid
 	if(is_grid)
 		glCallList(glrenderer::mysphereinfo.sphere_grid_display_list_id);
-
+	glPopMatrix();
 	//Render quad
 	/*glColor3d(0.0,1.0,0.0);
 	glBegin( GL_QUADS );
@@ -111,7 +114,7 @@ void glrenderer::setup_sphere(){
 	glNewList(glrenderer::mysphereinfo.sphere_display_list_id, GL_COMPILE);
 	glColor3d(1.0, 0.0, 0.0);
 	glPushMatrix();
-	glRotated(-90.0, 0.0, 1.0, 0.0);
+	//glRotated(-90.0, 0.0, 1.0, 0.0);
 	glBegin(GL_QUAD_STRIP);
 	for(int j=0;j<glrenderer::mysphereinfo.nteta;j++){
 		for(int i=0;i<=glrenderer::mysphereinfo.nfi;i++){

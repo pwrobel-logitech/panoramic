@@ -22,6 +22,8 @@ namespace glrenderer {
 		double horizontal_angular_overlap; //in radians, =0 by default
 		glm::dmat4 projection;
 		glm::dmat4 view_central_cam;
+		double center_teta;
+		double center_fi;//center of all cameras looks at these two angles, pointing upwards north
 	};
 
 	//minimal texture info
@@ -52,6 +54,7 @@ namespace glrenderer {
 	bool initGL(int sx, int sy);//init displaylists and pass window size
 	void renderGL(bool is_grid, int sx, int sy);//render with grid or not to the given viewport
 	void set_viewport_size(int x, int y);
+	void update_polar_center_look(double newteta, double newfi);
 	void setup_projection();
 	void setup_sphere();
 

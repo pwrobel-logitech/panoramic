@@ -38,7 +38,7 @@ int numdisplays = 0;
 int sizeX = 0;
 int sizeY = 0;
 
-bool is_spherical_grid = false;
+bool is_spherical_grid = true;
 
 void create_thread();
 static int MyThread(void *ptr);
@@ -81,6 +81,27 @@ void invalidate_screen(){
 	}
 }
 
+//polar angles of where the center of the scene looks initially at the sphere
+double default_center_teta = 90;//90 points to equator initially
+double default_center_fi = 0;
+bool is_request_update_polar_angles = false;
+void update_polar_angles(double dteta, double dfi){
+	lock_mutex();
+	default_center_fi += dfi;
+	default_center_teta += dteta;
+	if(default_center_teta<0)//block at poles
+		default_center_teta = 0;
+	if(default_center_teta>180)
+		default_center_teta = 180;
+	if(default_center_fi>360)
+		default_center_fi -= 360;
+	if(default_center_fi<-360)
+		default_center_fi += 360;
+	is_request_update_polar_angles = true;
+	unlock_mutex();
+}
+
+
 bool init(bool is_fullscreen)
 {
 	//Initialization flag
@@ -120,6 +141,8 @@ bool init(bool is_fullscreen)
 			{
 				SDL_GetWindowSize(gWindow, &sizeX, &sizeY);
 				printf("Got window size x: %d, y: %d \n", sizeX, sizeY);
+				glrenderer::myworld.center_fi = default_center_fi;
+				glrenderer::myworld.center_teta = default_center_teta;
 				if( !glrenderer::initGL(sizeX, sizeY) )
 				{
 					printf( "Unable to initialize OpenGL!\n" );
@@ -212,6 +235,26 @@ int main( int argc, char* args[] )
 						is_spherical_grid = !is_spherical_grid;
 						invalidate_screen();
 					}
+					if(e.key.keysym.sym == SDLK_RIGHT)
+					{
+						update_polar_angles(0.0, -2.0);
+						invalidate_screen();
+					}
+					if(e.key.keysym.sym == SDLK_LEFT)
+					{
+						update_polar_angles(0.0, 2.0);
+						invalidate_screen();
+					}
+					if(e.key.keysym.sym == SDLK_UP)
+					{
+						update_polar_angles(-2.0, 0.0);
+						invalidate_screen();
+					}
+					if(e.key.keysym.sym == SDLK_DOWN)
+					{
+						update_polar_angles(2.0, 0.0);
+						invalidate_screen();
+					}
 					break;
 			}
 		}
@@ -282,6 +325,18 @@ int MyThread(void *ptr)
 			is_displaychange_requested = false;
 		}
 		unlock_mutex();
+
+		lock_mutex();
+		if(is_request_update_polar_angles)
+		{
+			glrenderer::myworld.center_fi = default_center_fi;
+			glrenderer::myworld.center_teta = default_center_teta;
+			printf("teta : %f , fi : %f \n",glrenderer::myworld.center_teta, glrenderer::myworld.center_fi);
+			draw_frame();
+			is_request_update_polar_angles = false;
+		}
+		unlock_mutex();
+
 		//printf("\nThread counter: %d", cnt);
 		SDL_Delay(15);
 		if (!is_screen_valid){
