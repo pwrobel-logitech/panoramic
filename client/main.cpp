@@ -157,15 +157,15 @@ void close()
 
 
 int draw_frame(){
+
+	if (SDL_LockMutex(mutex) == 0) {
 	glrenderer::renderGL(is_spherical_grid);
 	//Update screen
     SDL_GL_SwapWindow( gWindow );
-	//if (SDL_LockMutex(mutex) == 0) {
-
-	//	SDL_UnlockMutex(mutex);
-	//} else {
-	//	fprintf(stderr, "Couldn't lock mutex\n");
-	//}
+		SDL_UnlockMutex(mutex);
+	} else {
+		fprintf(stderr, "Couldn't lock mutex\n");
+	}
 	return 0;
 }
 
@@ -173,22 +173,32 @@ SDL_Event event;
 
 int main( int argc, char* args[] )
 {
-	//Start up SDL and create window
-	if( !init(false) )
-	{
-		printf( "Failed to initialize!\n" );
+
+	create_thread();
+
+
+	if (SDL_LockMutex(mutex) == 0) {
+
+		SDL_UnlockMutex(mutex);
+	} else {
+		fprintf(stderr, "Couldn't lock mutex\n");
 	}
-	else
+
+
+
+	//Start up SDL and create window
+	
+	//else
 	{
 		//Load media
-		if( !loadMedia() )
-		{
-			printf( "Failed to load media!\n" );
-		}
-		else
+		//if( !loadMedia() )
+		//{
+		//	printf( "Failed to load media!\n" );
+		//}
+		//else
 		{	
-			create_thread();
-			draw_frame();
+			
+			//draw_frame();
 			//Main loop flag
 			bool quit = false;
 
@@ -205,12 +215,12 @@ int main( int argc, char* args[] )
 		switch (e.type)
         {
 			case SDL_WINDOWEVENT:
-				printf("Window event \n");
-				if( !glrenderer::initGL(sizeX, sizeY) )
-		        {
-					printf( "Unable to initialize OpenGL!\n" );
-		        }
-				draw_frame();
+				//printf("Window event \n");
+				//if( !glrenderer::initGL(sizeX, sizeY) )
+		       // {
+					//printf( "Unable to initialize OpenGL!\n" );
+		       // }
+				//draw_frame();
 				if(e.window.event == SDL_WINDOWEVENT_EXPOSED){
 					if(is_fullscreen){
 
@@ -227,20 +237,20 @@ int main( int argc, char* args[] )
                     quit = true; //quit
                 if(e.key.keysym.sym == SDLK_f)
                 {
-                    close();
-                    is_fullscreen = !is_fullscreen;
-                    init(is_fullscreen);
-					draw_frame();
+                    //close();
+                    //is_fullscreen = !is_fullscreen;
+                    //init(is_fullscreen);
+										//draw_frame();
                 }
                 if(e.key.keysym.sym == SDLK_d)
                 {
-                    close();
-                    printf("Display counter %d, numdisplays %d \n", screen_counter, numdisplays);
-                    screen_counter++;
-                    if (screen_counter >= numdisplays)
-                        screen_counter = 0;
-                    init(is_fullscreen);
-					draw_frame();
+                    //close();
+                    //printf("Display counter %d, numdisplays %d \n", screen_counter, numdisplays);
+                    //screen_counter++;
+                    //if (screen_counter >= numdisplays)
+                        //screen_counter = 0;
+                    //init(is_fullscreen);
+					//draw_frame();
                 }
 				if(e.key.keysym.sym == SDLK_s)
                 {
@@ -283,6 +293,10 @@ void create_thread(){
 	  return;
 	}
 	int threadReturnValue;
+
+
+	
+
 	printf("\nSimple SDL_CreateThread test:");
 
 	// Simply create a thread
@@ -297,9 +311,23 @@ int MyThread(void *ptr)
 {
     int cnt = 0;
 
+	if (SDL_LockMutex(mutex) == 0) {
+			if( !init(false) )
+		{
+			printf( "Failed to initialize!\n" );
+		}
+		SDL_UnlockMutex(mutex);
+	} else {
+		fprintf(stderr, "Couldn't lock mutex\n");
+	}
+
+	
+
+draw_frame();
+
     while(is_thread_running) {
         printf("\nThread counter: %d", cnt);
-        SDL_Delay(20);is_spherical_grid = !is_spherical_grid;draw_frame();
+        SDL_Delay(20);
 		if (!is_screen_valid){
 			draw_frame();
 			is_screen_valid = true;
