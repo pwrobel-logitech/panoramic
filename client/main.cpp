@@ -9,7 +9,7 @@
 
 //Window initial dimension constants
 const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+const int SCREEN_HEIGHT = 360;
 
 bool is_fullscreen = false;
 //Starts up SDL and creates window
@@ -59,8 +59,10 @@ bool unlock_mutex(){
 };
 
 
+bool is_requested_reread_winsize = false;
 bool is_fullscreenchange_requested = false;
 bool is_displaychange_requested = false;
+void request_reread_win_size();
 void request_fulscreen_change();
 void request_display_change();
 
@@ -99,6 +101,9 @@ bool init(bool is_fullscreen)
         gWindow = SDL_CreateWindow( "GL_RENDERER", SDL_WINDOWPOS_CENTERED_DISPLAY(screen_counter),
                                     SDL_WINDOWPOS_CENTERED_DISPLAY(screen_counter),
                                     SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN|SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE );
+
+
+
 		if( gWindow == NULL )
 		{
 			printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
@@ -106,8 +111,8 @@ bool init(bool is_fullscreen)
 		}
 		else
 		{
-			if(is_fullscreen)
-				SDL_SetWindowFullscreen(gWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+			//if(is_fullscreen)
+				//SDL_SetWindowFullscreen(gWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
 
 			//gl sdl stuff
@@ -134,7 +139,7 @@ bool init(bool is_fullscreen)
 		        }
 
 				//render gl
-				glrenderer::renderGL(is_spherical_grid);
+				glrenderer::renderGL(is_spherical_grid, sizeX, sizeY);
 			}
 		    //
 
@@ -176,7 +181,9 @@ void close()
 
 int draw_frame(){
 	lock_mutex();
-	glrenderer::renderGL(is_spherical_grid);
+	SDL_GetWindowSize(gWindow, &sizeX, &sizeY);
+	glrenderer::set_viewport_size(sizeX, sizeY);
+	glrenderer::renderGL(is_spherical_grid, sizeX, sizeY);
   SDL_GL_SwapWindow( gWindow );
 	unlock_mutex();
 	return 0;
@@ -224,7 +231,8 @@ unlock_mutex();
 		switch (e.type)
         {
 			case SDL_WINDOWEVENT:
-				//printf("Window event \n");
+				printf("Window event \n");
+				invalidate_screen();
 				//if( !glrenderer::initGL(sizeX, sizeY) )
 		       // {
 					//printf( "Unable to initialize OpenGL!\n" );
@@ -336,10 +344,28 @@ draw_frame();
     while(is_thread_running) {
 
 lock_mutex();
+
+
+if(is_requested_reread_winsize){
+	SDL_GetWindowSize(gWindow, &sizeX, &sizeY);
+	if( !glrenderer::initGL(sizeX, sizeY) )
+    {
+		printf( "Unable to initialize OpenGL!\n" );
+    }
+						draw_frame();
+}
+
+
 if(is_fullscreenchange_requested){
 
                     is_fullscreen = !is_fullscreen;
-                    init(is_fullscreen);
+
+					if(is_fullscreen){
+						SDL_SetWindowFullscreen(gWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);}
+					else{SDL_SetWindowFullscreen(gWindow, 0);}
+					SDL_GetWindowSize(gWindow, &sizeX, &sizeY);
+					printf("Got window size x: %d, y: %d \n", sizeX, sizeY);
+
 										draw_frame();
 	is_fullscreenchange_requested = false;
 }
@@ -347,6 +373,13 @@ unlock_mutex();
 
 lock_mutex();
 if(is_displaychange_requested){
+ numdisplays = SDL_GetNumVideoDisplays();
+	screen_counter++;
+    if (screen_counter >= numdisplays)
+        screen_counter = 0;
+
+
+
  //close();
                     //printf("Display counter %d, numdisplays %d \n", screen_counter, numdisplays);
                     //screen_counter++;
@@ -359,7 +392,7 @@ if(is_displaychange_requested){
 unlock_mutex();
 
         printf("\nThread counter: %d", cnt);
-        SDL_Delay(20);
+        SDL_Delay(50);
 		if (!is_screen_valid){
 			draw_frame();
 			is_screen_valid = true;
@@ -371,6 +404,11 @@ unlock_mutex();
 }
 
 
+void request_reread_win_size(){
+	lock_mutex();
+	is_requested_reread_winsize = true;
+	unlock_mutex();
+}
 
 void request_fulscreen_change(){
 	lock_mutex();

@@ -7,6 +7,7 @@ glrenderer::texinfo glrenderer::texdata;
 
 
 
+
 void glrenderer::setup_projection(){
 	double pi = 2.0 * glm::asin(1);
 	glViewport(0, 0, glrenderer::myworld.resX, glrenderer::myworld.resY);
@@ -14,6 +15,8 @@ void glrenderer::setup_projection(){
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
 
+
+	glrenderer::myworld.fovX = pi * (60.0 / 180.0);
 
 	double yfov = glrenderer::myworld.fovX * ((double)glrenderer::myworld.resY)/((double)glrenderer::myworld.resX) *
 			(180.0/pi);
@@ -36,8 +39,20 @@ void glrenderer::setup_projection(){
     }
 }
 
+void glrenderer::set_viewport_size(int x, int y){
+	glrenderer::myworld.resX = x;
+	glrenderer::myworld.resY = y;
+}
+
 bool glrenderer::initGL(int sx, int sy)
 {
+	glEnable(GL_DEPTH_TEST);
+
+    //Initialize Modelview Matrix
+    glMatrixMode( GL_MODELVIEW );
+    glLoadIdentity();
+	glrenderer::setup_sphere();
+	/*
 	//fill the necessary data
 
 	double pi = 2.0 * glm::asin(1);
@@ -79,8 +94,8 @@ bool glrenderer::initGL(int sx, int sy)
     {
         success = false;
     }
-
-    return success;
+*/
+    return false;
 }
 
 
@@ -90,13 +105,24 @@ bool glrenderer::initGL(int sx, int sy)
 
 
 
-void glrenderer::renderGL(bool is_grid)
+void glrenderer::renderGL(bool is_grid, int sx, int sy)
 {
 	GLenum error = GL_NO_ERROR;
+
+	double pi = 2.0 * glm::asin(1);
+
+	glrenderer::myworld.resX = sx;
+	glrenderer::myworld.resY = sy;
+	glrenderer::myworld.fovX = pi * (60.0 / 180.0);
+	glrenderer::myworld.horizontal_angular_overlap = 0;
+
 
 	glrenderer::setup_projection();
 
 
+
+
+	glViewport(0, 0, glrenderer::myworld.resX, glrenderer::myworld.resY);
     //Initialize Modelview Matrix
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();

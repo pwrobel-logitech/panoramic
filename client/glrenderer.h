@@ -49,7 +49,8 @@ struct sphereinfo{
 extern sphereinfo mysphereinfo;
 
 bool initGL(int sx, int sy);
-void renderGL(bool is_grid);
+void renderGL(bool is_grid, int sx, int sy);
+void set_viewport_size(int x, int y);
 void setup_projection();
 void setup_sphere();
 
