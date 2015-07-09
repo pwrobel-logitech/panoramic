@@ -118,8 +118,8 @@ glrenderer::sphereinfo glrenderer::mysphereinfo;
 void glrenderer::setup_sphere(){
 	double pi = 2.0 * glm::asin(1);
 	glrenderer::mysphereinfo.R = 100;
-	glrenderer::mysphereinfo.nfi = 50;
-	glrenderer::mysphereinfo.nteta = 50;
+	glrenderer::mysphereinfo.nfi = 90;
+	glrenderer::mysphereinfo.nteta = 90;
 	glrenderer::mysphereinfo.normal_dir = -1.0;
 
 	double d_fi = (2.0*pi)/glrenderer::mysphereinfo.nfi;
@@ -129,17 +129,33 @@ void glrenderer::setup_sphere(){
 
 	glrenderer::mysphereinfo.sphere_display_list_id = glGenLists (1);
 	glNewList(glrenderer::mysphereinfo.sphere_display_list_id, GL_COMPILE);
-	glColor3d(1.0, 0.0, 0.0);
+	glColor3d(1.0, 1.0, 1.0);
+
+    glEnable( GL_TEXTURE_2D );
+    //glGenTextures(1, &mtex0id);
+    //glBindTexture(GL_TEXTURE_2D, mtex0id);
+
+    int Mode = GL_RGB;
+    printf(" QQ surf : %d\n", glrenderer::surf);
+    if(glrenderer::surf->format->BytesPerPixel == 4) {
+        Mode = GL_RGBA;
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, Mode, glrenderer::surf->w, glrenderer::surf->h, 0, Mode, GL_UNSIGNED_BYTE, glrenderer::surf->pixels);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 	glPushMatrix();
 	//glRotated(-90.0, 0.0, 1.0, 0.0);
 	glBegin(GL_QUAD_STRIP);
 	for(int j=0;j<glrenderer::mysphereinfo.nteta;j++){
 		for(int i=0;i<=glrenderer::mysphereinfo.nfi;i++){
 			glNormal3d(glrenderer::mysphereinfo.normal_dir*sin(j*d_teta)*cos(i*d_fi),glrenderer::mysphereinfo.normal_dir*sin(j*d_teta)*sin(i*d_fi),glrenderer::mysphereinfo.normal_dir*cos(j*d_teta));
-			//glTexCoord2d(((i*d_fi)/(2.0*Math.PI))*uzyteczna_czesc_textury_x,(1-cos(j*d_teta))/2.0);
+			glTexCoord2d(((i*d_fi)/(2.0*pi)),(1-cos(j*d_teta))/2.0);
 			glVertex3d(R*sin(j*d_teta)*cos(i*d_fi),R*sin(j*d_teta)*sin(i*d_fi),R*cos(j*d_teta));
 			glNormal3d(glrenderer::mysphereinfo.normal_dir*sin((j+1)*d_teta)*cos(i*d_fi),glrenderer::mysphereinfo.normal_dir*sin((j+1)*d_teta)*sin(i*d_fi),glrenderer::mysphereinfo.normal_dir*cos((j+1)*d_teta));
-			//glTexCoord2d(((i*d_fi)/(2.0*Math.PI))*uzyteczna_czesc_textury_x,(1-cos((j+1)*d_teta))/2.0);
+			glTexCoord2d(((i*d_fi)/(2.0*pi)),(1-cos((j+1)*d_teta))/2.0);
 			glVertex3d(R*sin((j+1)*d_teta)*cos(i*d_fi), R*sin((j+1)*d_teta)*sin(i*d_fi), R*cos((j+1)*d_teta));
 		}
 	}

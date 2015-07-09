@@ -364,7 +364,7 @@ void request_display_change(){
 }
 
 void loadMedia(){
-    glrenderer::surf = IMG_Load("img0.jpg");
+    glrenderer::surf = IMG_Load("img1.jpg");
     printf("Img loaded , w : %d, h : %d \n",glrenderer::surf->w,glrenderer::surf->h);
     glrenderer::setup_textures();
 }
