@@ -26,9 +26,9 @@ void glrenderer::setup_projection(){
 
 	//Check for error
 	bool error = glGetError();
-	if( error != GL_NO_ERROR )
+	if( error != GL_NO_ERROR ) //error during autorotate, fix it !
 	{
-		printf("Error projection \n");
+		//printf("Error projection \n");
 	}
 }
 
@@ -86,30 +86,30 @@ void glrenderer::renderGL(bool is_grid, int sx, int sy)
 		glCallList(glrenderer::mysphereinfo.sphere_grid_display_list_id);
 	glPopMatrix();
 	//Render quad
-	glColor3d(0.0,1.0,0.0);
+	/*glColor3d(0.0,1.0,0.0);
 
-    glEnable( GL_TEXTURE_2D );
-    //glGenTextures(1, &mtex0id);
-    //glBindTexture(GL_TEXTURE_2D, mtex0id);
+	glEnable( GL_TEXTURE_2D );
+	//glGenTextures(1, &mtex0id);
+	//glBindTexture(GL_TEXTURE_2D, mtex0id);
 
-    int Mode = GL_RGB;
-    printf(" QQ surf : %d\n", glrenderer::surf);
-    if(glrenderer::surf->format->BytesPerPixel == 4) {
-        Mode = GL_RGBA;
-    }
+	int Mode = GL_RGB;
+	printf(" QQ surf : %d\n", glrenderer::surf);
+	if(glrenderer::surf->format->BytesPerPixel == 4) {
+		Mode = GL_RGBA;
+	}
 
-    glTexImage2D(GL_TEXTURE_2D, 0, Mode, glrenderer::surf->w, glrenderer::surf->h, 0, Mode, GL_UNSIGNED_BYTE, glrenderer::surf->pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, Mode, glrenderer::surf->w, glrenderer::surf->h, 0, Mode, GL_UNSIGNED_BYTE, glrenderer::surf->pixels);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glLoadIdentity();
-    //glBindTexture(GL_TEXTURE_2D, mtex0id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glLoadIdentity();
+	//glBindTexture(GL_TEXTURE_2D, mtex0id);
 	glBegin( GL_QUADS );
 		glTexCoord2f(0, 0);glVertex3d( -0.5, -0.5, -2 );
 		glTexCoord2f(1, 0);glVertex3d( 0.5, -0.5 , -2);
 		glTexCoord2f(1, 1);glVertex3d( 0.5, 0.5, -2 );
 		glTexCoord2f(0, 1);glVertex3d( -0.5, 0.5 , -2);
-	glEnd();
+	glEnd();*/
 }
 
 
@@ -131,23 +131,23 @@ void glrenderer::setup_sphere(){
 	glNewList(glrenderer::mysphereinfo.sphere_display_list_id, GL_COMPILE);
 	glColor3d(1.0, 1.0, 1.0);
 
-    glEnable( GL_TEXTURE_2D );
-    //glGenTextures(1, &mtex0id);
-    //glBindTexture(GL_TEXTURE_2D, mtex0id);
+	glEnable( GL_TEXTURE_2D );
+	//glGenTextures(1, &mtex0id);
+	//glBindTexture(GL_TEXTURE_2D, mtex0id);
 
-    int Mode = GL_RGB;
-    printf(" QQ surf : %d\n", glrenderer::surf);
-    if(glrenderer::surf->format->BytesPerPixel == 4) {
-        Mode = GL_RGBA;
-    }
+	int Mode = GL_RGB;
+	printf(" QQ surf : %d\n", glrenderer::surf);
+	if(glrenderer::surf->format->BytesPerPixel == 4) {
+		Mode = GL_RGBA;
+	}
 
-    glTexImage2D(GL_TEXTURE_2D, 0, Mode, glrenderer::surf->w, glrenderer::surf->h, 0, Mode, GL_UNSIGNED_BYTE, glrenderer::surf->pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, Mode, glrenderer::surf->w, glrenderer::surf->h, 0, Mode, GL_UNSIGNED_BYTE, glrenderer::surf->pixels);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glPushMatrix();
-	//glRotated(-90.0, 0.0, 1.0, 0.0);
+	glRotated(180.0, 1.0, 0.0, 0.0);
 	glBegin(GL_QUAD_STRIP);
 	for(int j=0;j<glrenderer::mysphereinfo.nteta;j++){
 		for(int i=0;i<=glrenderer::mysphereinfo.nfi;i++){

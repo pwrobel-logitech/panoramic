@@ -38,7 +38,7 @@ int numdisplays = 0;
 int sizeX = 0;
 int sizeY = 0;
 
-bool is_spherical_grid = true;
+bool is_spherical_grid = false;
 
 void create_thread();
 static int MyThread(void *ptr);
@@ -62,13 +62,17 @@ bool unlock_mutex(){
 	return true;///fix this latex to check if it succeeds
 };
 
+const double default_autorotate_step = 0.05;
 //flags used to communicate from input event thread to the rendering thread
 bool is_requested_reread_winsize = false;
 bool is_fullscreenchange_requested = false;
 bool is_displaychange_requested = false;
+bool is_request_autorotate = true;
+double autorotate_step=default_autorotate_step;
 void request_reread_win_size();
 void request_fulscreen_change();
 void request_display_change();
+void request_autorotate(double step);
 
 
 //invalidate logics - invalidate = request for a redraw in a separate thread
@@ -214,6 +218,10 @@ int main( int argc, char* args[] )
 				case SDL_KEYDOWN:
 					if(e.key.keysym.sym == SDLK_ESCAPE)
 						quit = true; //quit
+					if(e.key.keysym.sym == SDLK_a)
+					{
+						request_autorotate(default_autorotate_step);
+					}
 					if(e.key.keysym.sym == SDLK_f)
 					{
 						request_fulscreen_change();
@@ -230,22 +238,22 @@ int main( int argc, char* args[] )
 					}
 					if(e.key.keysym.sym == SDLK_RIGHT)
 					{
-						update_polar_angles(0.0, -2.0);
+						update_polar_angles(0.0, -1.0);
 						invalidate_screen();
 					}
 					if(e.key.keysym.sym == SDLK_LEFT)
 					{
-						update_polar_angles(0.0, 2.0);
+						update_polar_angles(0.0, 1.0);
 						invalidate_screen();
 					}
 					if(e.key.keysym.sym == SDLK_UP)
 					{
-						update_polar_angles(-2.0, 0.0);
+						update_polar_angles(-1.0, 0.0);
 						invalidate_screen();
 					}
 					if(e.key.keysym.sym == SDLK_DOWN)
 					{
-						update_polar_angles(2.0, 0.0);
+						update_polar_angles(1.0, 0.0);
 						invalidate_screen();
 					}
 					break;
@@ -332,8 +340,15 @@ int MyThread(void *ptr)
 		}
 		unlock_mutex();
 
+		lock_mutex();
+		if(is_request_autorotate){
+			default_center_fi+=autorotate_step;
+			glrenderer::myworld.center_fi = default_center_fi;
+			is_screen_valid = false;
+		}
+		unlock_mutex();
 		//printf("\nThread counter: %d", cnt);
-		SDL_Delay(15);
+		SDL_Delay(1);
 		if (!is_screen_valid){
 			draw_frame();
 			is_screen_valid = true;
@@ -363,8 +378,15 @@ void request_display_change(){
 	unlock_mutex();
 }
 
+void request_autorotate(double step){
+	lock_mutex();
+	autorotate_step = step;
+	is_request_autorotate = !is_request_autorotate;
+	unlock_mutex();
+}
+
 void loadMedia(){
-    glrenderer::surf = IMG_Load("img1.jpg");
+    glrenderer::surf = IMG_Load("img.jpg");
     printf("Img loaded , w : %d, h : %d \n",glrenderer::surf->w,glrenderer::surf->h);
     glrenderer::setup_textures();
 }
