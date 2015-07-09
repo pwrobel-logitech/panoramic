@@ -86,13 +86,30 @@ void glrenderer::renderGL(bool is_grid, int sx, int sy)
 		glCallList(glrenderer::mysphereinfo.sphere_grid_display_list_id);
 	glPopMatrix();
 	//Render quad
-	/*glColor3d(0.0,1.0,0.0);
+	glColor3d(0.0,1.0,0.0);
+
+    glEnable( GL_TEXTURE_2D );
+    //glGenTextures(1, &mtex0id);
+    //glBindTexture(GL_TEXTURE_2D, mtex0id);
+
+    int Mode = GL_RGB;
+    printf(" QQ surf : %d\n", glrenderer::surf);
+    if(glrenderer::surf->format->BytesPerPixel == 4) {
+        Mode = GL_RGBA;
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, Mode, glrenderer::surf->w, glrenderer::surf->h, 0, Mode, GL_UNSIGNED_BYTE, glrenderer::surf->pixels);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glLoadIdentity();
+    //glBindTexture(GL_TEXTURE_2D, mtex0id);
 	glBegin( GL_QUADS );
-		glVertex3d( -0.5, -0.5, -2 );
-		glVertex3d( 0.5, -0.5 , -2);
-		glVertex3d( 0.5, 0.5, -2 );
-		glVertex3d( -0.5, 0.5 , -2);
-	glEnd();*/
+		glTexCoord2f(0, 0);glVertex3d( -0.5, -0.5, -2 );
+		glTexCoord2f(1, 0);glVertex3d( 0.5, -0.5 , -2);
+		glTexCoord2f(1, 1);glVertex3d( 0.5, 0.5, -2 );
+		glTexCoord2f(0, 1);glVertex3d( -0.5, 0.5 , -2);
+	glEnd();
 }
 
 
@@ -155,4 +172,25 @@ void glrenderer::setup_sphere(){
 	glEnd();
 	glPopMatrix();
 	glEndList();
+}
+
+GLuint glrenderer::mtex0id = 0;
+SDL_Surface *glrenderer::surf;
+
+void glrenderer::setup_textures(){
+
+    //glEnable( GL_TEXTURE_2D );
+    //glGenTextures(1, &mtex0id);
+    //glBindTexture(GL_TEXTURE_2D, mtex0id);
+
+    //int Mode = GL_RGB;
+
+    //if(glrenderer::surf->format->BytesPerPixel == 4) {
+    //    Mode = GL_RGBA;
+   // }
+
+    //glTexImage2D(GL_TEXTURE_2D, 0, Mode, glrenderer::surf->w, glrenderer::surf->h, 0, Mode, GL_UNSIGNED_BYTE, glrenderer::surf->pixels);
+
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }

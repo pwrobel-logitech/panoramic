@@ -1,6 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
-//#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include <string>
 #include <iostream>
@@ -50,6 +50,9 @@ namespace glrenderer {
 
 	extern sphereinfo mysphereinfo;
 
+	extern GLuint mtex0id;
+	extern SDL_Surface *surf;
+
 	//Call only from the render thread only !
 	bool initGL(int sx, int sy);//init displaylists and pass window size
 	void renderGL(bool is_grid, int sx, int sy);//render with grid or not to the given viewport
@@ -57,5 +60,6 @@ namespace glrenderer {
 	void update_polar_center_look(double newteta, double newfi);
 	void setup_projection();
 	void setup_sphere();
+	void setup_textures();
 
 }
