@@ -1,6 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
-//#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include <string>
 #include <iostream>
@@ -19,7 +19,7 @@ bool init(bool is_fullscreen);
 void PrintEvent(const SDL_Event * event);
 
 //Loads media
-bool loadMedia();
+void loadMedia();
 
 //Frees media and shuts down SDL
 void close();
@@ -101,6 +101,7 @@ void update_polar_angles(double dteta, double dfi){
 	unlock_mutex();
 }
 
+SDL_Surface* IMGSurf;
 
 bool init(bool is_fullscreen)
 {
@@ -159,14 +160,6 @@ bool init(bool is_fullscreen)
 		printf("Error in the number of the displays \n");
 		exit(0);
 	}
-	return success;
-}
-
-bool loadMedia()
-{
-	//Loading success flag
-	bool success = true;
-	//Nothing to load
 	return success;
 }
 
@@ -285,6 +278,7 @@ void create_thread(){
 
 int MyThread(void *ptr)
 {
+	loadMedia();
 	int cnt = 0;
 	lock_mutex();
 	if(!init(false))
@@ -366,6 +360,49 @@ void request_display_change(){
 	lock_mutex();
 	is_displaychange_requested = true;
 	unlock_mutex();
+}
+
+void loadMedia(){
+    SDL_Surface* IMGSurf = IMG_Load("img0.jpg");
+    printf("Img loaded , w : %d, h : %d \n",IMGSurf->w, IMGSurf->h);
+    /*
+    GLuint TextureID = 0;
+
+    // You should probably use CSurface::OnLoad ... ;)
+    //-- and make sure the Surface pointer is good!
+    SDL_Surface* Surface = IMG_Load("someimage.jpg");
+
+    glGenTextures(1, &TextureID);
+    glBindTexture(GL_TEXTURE_2D, TextureID);
+
+    int Mode = GL_RGB;
+
+    if(Surface->format->BytesPerPixel == 4) {
+        Mode = GL_RGBA;
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, Mode, Surface->w, Surface->h, 0, Mode, GL_UNSIGNED_BYTE, Surface->pixels);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+*/
+
+/*
+glBindTexture(GL_TEXTURE_2D, TextureID);
+
+// For Ortho mode, of course
+int X = 0;
+int Y = 0;
+int Width = 100;
+int Height = 100;
+
+glBegin(GL_QUADS);
+    glTexCoord2f(0, 0); glVertex3f(X, Y, 0);
+    glTexCoord2f(1, 0); glVertex3f(X + Width, Y, 0);
+    glTexCoord2f(1, 1); glVertex3f(X + Width, Y + Height, 0);
+    glTexCoord2f(0, 1); glVertex3f(X, Y + Height, 0);
+glEnd();
+*/
 }
 
 void PrintEvent(const SDL_Event * event)
