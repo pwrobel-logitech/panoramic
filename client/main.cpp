@@ -109,53 +109,25 @@ SDL_Surface* IMGSurf;
 
 bool init(bool is_fullscreen)
 {
-	//Initialization flag
-	bool success = true;
-	//Initialize SDL
-	if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
+	//gl sdl stuff
+	printf("Started to initialize opengl context \n");
+	glrenderer::gContext = SDL_GL_CreateContext( gWindow );
+	if( glrenderer::gContext == NULL )
 	{
-		printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
-		success = false;
+		printf( "OpenGL context could not be created! SDL Error: %s\n", SDL_GetError() );
 	}
 	else
 	{
-		//Set texture filtering to linear
-		if( !SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" ) )
+		SDL_GetWindowSize(gWindow, &sizeX, &sizeY);
+		printf("Got window size x: %d, y: %d \n", sizeX, sizeY);
+		glrenderer::myworld.center_fi = default_center_fi;
+		glrenderer::myworld.center_teta = default_center_teta;
+		if( !glrenderer::initGL(sizeX, sizeY) )
 		{
-			printf( "Warning: Linear texture filtering not enabled!" );
+			printf( "Unable to initialize OpenGL!\n" );
 		}
-		//Create window
-		gWindow = SDL_CreateWindow( "GL_RENDERER", SDL_WINDOWPOS_CENTERED_DISPLAY(screen_counter),
-			SDL_WINDOWPOS_CENTERED_DISPLAY(screen_counter),
-			SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN|SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE );
-		if( gWindow == NULL )
-		{
-			printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
-			success = false;
-		}
-		else
-		{
-			//gl sdl stuff
-			printf("started to initialize opengl context \n");
-			glrenderer::gContext = SDL_GL_CreateContext( gWindow );
-			if( glrenderer::gContext == NULL )
-			{
-				printf( "OpenGL context could not be created! SDL Error: %s\n", SDL_GetError() );
-			}
-			else
-			{
-				SDL_GetWindowSize(gWindow, &sizeX, &sizeY);
-				printf("Got window size x: %d, y: %d \n", sizeX, sizeY);
-				glrenderer::myworld.center_fi = default_center_fi;
-				glrenderer::myworld.center_teta = default_center_teta;
-				if( !glrenderer::initGL(sizeX, sizeY) )
-				{
-					printf( "Unable to initialize OpenGL!\n" );
-				}
-				//render gl
-				glrenderer::renderGL(is_spherical_grid, sizeX, sizeY);
-			}
-		}
+		//render gl
+		glrenderer::renderGL(is_spherical_grid, sizeX, sizeY);
 	}
 	numdisplays = SDL_GetNumVideoDisplays();
 	printf("Numdisplays %d \n", numdisplays);
@@ -164,7 +136,7 @@ bool init(bool is_fullscreen)
 		printf("Error in the number of the displays \n");
 		exit(0);
 	}
-	return success;
+	return true;
 }
 
 void close()
@@ -190,6 +162,23 @@ SDL_Event event;
 
 int main( int argc, char* args[] )
 {
+	//Initialization flag
+	bool success = true;
+	//Initialize SDL
+	if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
+	{
+		printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
+		success = false;
+	}
+	//Create window
+	gWindow = SDL_CreateWindow( "GL_RENDERER", SDL_WINDOWPOS_CENTERED_DISPLAY(screen_counter),
+	SDL_WINDOWPOS_CENTERED_DISPLAY(screen_counter),
+	SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN|SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE );
+	if( gWindow == NULL )
+	{
+		printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
+		success = false;
+	}
 	create_thread();
 	lock_mutex();
 	unlock_mutex();
@@ -224,6 +213,10 @@ int main( int argc, char* args[] )
 					}
 					if(e.key.keysym.sym == SDLK_f)
 					{
+						is_fullscreen = !is_fullscreen;
+						SDL_SetWindowFullscreen(gWindow, is_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+						SDL_GetWindowSize(gWindow, &sizeX, &sizeY);
+						printf("Got window size x: %d, y: %d \n", sizeX, sizeY);
 						request_fulscreen_change();
 					}
 					if(e.key.keysym.sym == SDLK_d)
@@ -309,10 +302,6 @@ int MyThread(void *ptr)
 		}
 		if(is_fullscreenchange_requested)
 		{
-			is_fullscreen = !is_fullscreen;
-			SDL_SetWindowFullscreen(gWindow, is_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
-			SDL_GetWindowSize(gWindow, &sizeX, &sizeY);
-			printf("Got window size x: %d, y: %d \n", sizeX, sizeY);
 			draw_frame();
 			is_fullscreenchange_requested = false;
 		}
@@ -386,7 +375,7 @@ void request_autorotate(double step){
 }
 
 void loadMedia(){
-    glrenderer::surf = IMG_Load("img.jpg");
+    glrenderer::surf = IMG_Load("image.jpg");
     printf("Img loaded , w : %d, h : %d \n",glrenderer::surf->w,glrenderer::surf->h);
     glrenderer::setup_textures();
 }
