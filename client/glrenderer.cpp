@@ -77,8 +77,10 @@ void render_subscreen(bool is_grid, int sx, int sy, int nx_scr, int ny_scr)
 	//Render sphere
 	glCallList(glrenderer::mysphereinfo.sphere_display_list_id);
 	//Render spherical grid
+	glPushMatrix();
 	if(is_grid)
 		glCallList(glrenderer::mysphereinfo.sphere_grid_display_list_id);
+	glPopMatrix();
 	glPopMatrix();
 	//Render quad
 	/*glColor3d(0.0,1.0,0.0);
@@ -170,7 +172,7 @@ void glrenderer::setup_sphere(){
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glPushMatrix();
+	//glPushMatrix();
 	glRotated(180.0, 1.0, 0.0, 0.0);
 	glBegin(GL_QUAD_STRIP);
 	for(int j=0;j<glrenderer::mysphereinfo.nteta;j++){
@@ -210,7 +212,7 @@ void glrenderer::setup_sphere(){
 		}
 	}
 	glEnd();
-	glPopMatrix();
+	//glPopMatrix();
 	glEndList();
 }
 
