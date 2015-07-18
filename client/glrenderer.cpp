@@ -27,11 +27,11 @@ void glrenderer::setup_projection(int dividerX, int dividerY){
 	glFrustum( -fW, fW, -fH, fH, zNear, zFar );//perspective : left, right, bottom, top
 
 	//Check for error
-	bool error = glGetError();
-	if( error != GL_NO_ERROR ) //error during autorotate, fix it !
-	{
+	//bool error = glGetError();
+	//if( error != GL_NO_ERROR ) //error during autorotate, fix it !
+	//{
 		//printf("Error projection \n");
-	}
+	//}
 }
 
 void glrenderer::set_viewport_size(int x, int y){
@@ -46,7 +46,7 @@ bool glrenderer::initGL(int sx, int sy)
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
 	glrenderer::setup_sphere();
-	return false;
+	return true;
 }
 
 void render_subscreen(bool is_grid, int sx, int sy, int nx_scr, int ny_scr)
@@ -67,7 +67,7 @@ void render_subscreen(bool is_grid, int sx, int sy, int nx_scr, int ny_scr)
 	error = glGetError();
 	if( error != GL_NO_ERROR )
 	{
-		printf("a1 : error rendering gl \n");
+		printf("GLREND a1 : error rendering gl \n");
 	}
 	
 

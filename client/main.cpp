@@ -1,6 +1,3 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include <string>
 #include <iostream>
@@ -88,7 +85,7 @@ void invalidate_screen(){
 //polar angles of where the center of the scene looks initially at the sphere
 double default_center_teta = 90;//90 points to equator initially
 double default_center_fi = 0;
-int default_NviewX = 10;
+int default_NviewX = 8;
 int default_NviewY = 1;
 bool is_request_update_polar_angles = false;
 void update_polar_angles(double dteta, double dfi){
@@ -379,7 +376,7 @@ void request_autorotate(double step){
 }
 
 void loadMedia(){
-    glrenderer::surf = IMG_Load("image.jpg");
+    glrenderer::surf = IMG_Load("imgbig.jpg");
     printf("Img loaded , w : %d, h : %d \n",glrenderer::surf->w,glrenderer::surf->h);
     glrenderer::setup_textures();
 }
