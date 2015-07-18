@@ -6,14 +6,16 @@ glrenderer::texinfo glrenderer::texdata;
 
 double default_fovX = 90;//degrees
 
-void glrenderer::setup_projection(){
-	double pi = 2.0 * glm::asin(1);
-	glViewport(0, 0, glrenderer::myworld.resX, glrenderer::myworld.resY);
+void glrenderer::setup_projection(int dividerX, int dividerY){
+	double pi = 2.0 * glm::asin(1.0);
+	//glViewport(0, 0, glrenderer::myworld.resX, glrenderer::myworld.resY);
 	//Initialize Projection Matrix
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();
 	glrenderer::myworld.fovX = pi * (default_fovX / 180.0);
-	double yfov = (180.0/pi)*2.0*atan((((double)glrenderer::myworld.resY)/((double)glrenderer::myworld.resX))*tan(glrenderer::myworld.fovX/2.0));
+	double subscr_fovX = glrenderer::myworld.fovX / dividerX;
+	double yfov = (180.0/pi)*2.0*atan((((double)glrenderer::myworld.resY/((double)dividerY))/((double)glrenderer::myworld.resX/((double)dividerX)))*tan(subscr_fovX/2.0));
+	glrenderer::myworld.fovY = pi * (yfov / 180.0);
 	//glm::dmat4 projection = glm::perspective(yfov,((double)glrenderer::myworld.resX)/((double)glrenderer::myworld.resY) , 0.1, 10.0);
 	//glLoadMatrixd( &projection[0][0]);
 	//gluPerspective(90.0,((double)glrenderer::myworld.resX)/((double)glrenderer::myworld.resY) , 0.1, 10.0);
@@ -21,7 +23,7 @@ void glrenderer::setup_projection(){
 	double zFar = 1000.0;
 	double fy = yfov;
 	double fH = tan( (fy / 2.0) / 180.0 * pi ) * zNear;
-	double fW = ((double)glrenderer::myworld.resX)/((double)glrenderer::myworld.resY) * fH;
+	double fW = ((double)glrenderer::myworld.resX/((double)dividerX))/((double)glrenderer::myworld.resY/((double)dividerY)) * fH;
 	glFrustum( -fW, fW, -fH, fH, zNear, zFar );//perspective : left, right, bottom, top
 
 	//Check for error
@@ -47,25 +49,19 @@ bool glrenderer::initGL(int sx, int sy)
 	return false;
 }
 
-void glrenderer::renderGL(bool is_grid, int sx, int sy)
+void render_subscreen(bool is_grid, int sx, int sy, int nx_scr, int ny_scr)
 {
+		
 	GLenum error = GL_NO_ERROR;
-	double pi = 2.0 * glm::asin(1);
-	glrenderer::myworld.resX = sx;
-	glrenderer::myworld.resY = sy;
-	glrenderer::myworld.fovX = pi * (default_fovX / 180.0);
-	glrenderer::myworld.horizontal_angular_overlap = 0;
-	glrenderer::setup_projection();
-	glViewport(0, 0, glrenderer::myworld.resX, glrenderer::myworld.resY);
+	glrenderer::setup_projection(glrenderer::myworld.NviewX,glrenderer::myworld.NviewY);
+	glViewport((glrenderer::myworld.resX/glrenderer::myworld.NviewX)*nx_scr, (glrenderer::myworld.resY/glrenderer::myworld.NviewY)*ny_scr, glrenderer::myworld.resX/glrenderer::myworld.NviewX, glrenderer::myworld.resY/glrenderer::myworld.NviewY);
 	//Initialize Modelview Matrix
 	glMatrixMode( GL_MODELVIEW );
-	glLoadIdentity();
 
 	//eye, center, up
 	//glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, 0.0, -4.0), glm::dvec3(1.0, 1.0, 0.0));
 	//glLoadMatrixd(&view[0][0]);
-	//clear color
-	glClearColor( 0.f, 0.f, 0.4f, 1.f );
+	
 
 	//Check for error
 	error = glGetError();
@@ -73,8 +69,7 @@ void glrenderer::renderGL(bool is_grid, int sx, int sy)
 	{
 		printf("a1 : error rendering gl \n");
 	}
-	//Clear color buffer and depth buffer
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	
 
 	glPushMatrix();
 	glRotated(glrenderer::myworld.center_teta, 1.0, 0.0, 0.0);
@@ -112,14 +107,43 @@ void glrenderer::renderGL(bool is_grid, int sx, int sy)
 	glEnd();*/
 }
 
+void glrenderer::renderGL(bool is_grid, int sx, int sy)
+{
+	double pi = 2.0 * glm::asin(1.0);
+	glrenderer::myworld.resX = sx;
+	glrenderer::myworld.resY = sy;
+	glrenderer::myworld.fovX = pi * (default_fovX / 180.0);
+	glrenderer::myworld.horizontal_angular_overlap = 0;
+	
+	//Clear color buffer and depth buffer
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	//clear color
+	glClearColor( 0.f, 0.f, 0.4f, 1.f );
+	glMatrixMode( GL_MODELVIEW );
+	glLoadIdentity();
+	for(int i=0;i<glrenderer::myworld.NviewX;i++)
+		for(int j=0;j<glrenderer::myworld.NviewY;j++){
+			glPushMatrix();
+			
+			
+			double yfovdeg = (glrenderer::myworld.fovY/pi) * 180.0;
+			//glRotated(((j-((glrenderer::myworld.NviewY-1.0)/2.0)))*(((double)yfovdeg)/((double)glrenderer::myworld.NviewY)),1.0,0.0,0.0);
+			glRotated(((i-((glrenderer::myworld.NviewX-1.0)/2.0)))*(((double)default_fovX)/((double)glrenderer::myworld.NviewX)),0.0,1,0.0);
+			render_subscreen(is_grid, sx, sy, i, j);
+			glPopMatrix();
+		}
+	glFlush();
+	glFinish();
+}
+
 
 glrenderer::sphereinfo glrenderer::mysphereinfo;
 
 void glrenderer::setup_sphere(){
-	double pi = 2.0 * glm::asin(1);
+	double pi = 2.0 * glm::asin(1.0);
 	glrenderer::mysphereinfo.R = 100;
-	glrenderer::mysphereinfo.nfi = 90;
-	glrenderer::mysphereinfo.nteta = 90;
+	glrenderer::mysphereinfo.nfi = 60;
+	glrenderer::mysphereinfo.nteta = 60;
 	glrenderer::mysphereinfo.normal_dir = -1.0;
 
 	double d_fi = (2.0*pi)/glrenderer::mysphereinfo.nfi;

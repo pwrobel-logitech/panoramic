@@ -18,12 +18,15 @@ namespace glrenderer {
 	struct worldinfo{
 		int resX;
 		int resY;
-		double fovX;// total angle in radians
+		double fovX;// total angle in radians in X
+		double fovY;
 		double horizontal_angular_overlap; //in radians, =0 by default
 		glm::dmat4 projection;
 		glm::dmat4 view_central_cam;
 		double center_teta;
 		double center_fi;//center of all cameras looks at these two angles, pointing upwards north
+		int NviewX;//num viewport on x - correct for non-linearity of sterographics projection
+		int NviewY;
 	};
 
 	//minimal texture info
@@ -58,7 +61,7 @@ namespace glrenderer {
 	void renderGL(bool is_grid, int sx, int sy);//render with grid or not to the given viewport
 	void set_viewport_size(int x, int y);
 	void update_polar_center_look(double newteta, double newfi);
-	void setup_projection();
+	void setup_projection(int dividerX, int dividerY);
 	void setup_sphere();
 	void setup_textures();
 

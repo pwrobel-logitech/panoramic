@@ -88,6 +88,8 @@ void invalidate_screen(){
 //polar angles of where the center of the scene looks initially at the sphere
 double default_center_teta = 90;//90 points to equator initially
 double default_center_fi = 0;
+int default_NviewX = 10;
+int default_NviewY = 1;
 bool is_request_update_polar_angles = false;
 void update_polar_angles(double dteta, double dfi){
 	lock_mutex();
@@ -122,6 +124,8 @@ bool init(bool is_fullscreen)
 		printf("Got window size x: %d, y: %d \n", sizeX, sizeY);
 		glrenderer::myworld.center_fi = default_center_fi;
 		glrenderer::myworld.center_teta = default_center_teta;
+		glrenderer::myworld.NviewX = default_NviewX;
+		glrenderer::myworld.NviewY = default_NviewY;
 		if( !glrenderer::initGL(sizeX, sizeY) )
 		{
 			printf( "Unable to initialize OpenGL!\n" );
